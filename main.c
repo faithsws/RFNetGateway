@@ -317,30 +317,8 @@ int main (void)
 	eeprom_read_block ( &server_ip, ee_server_ip, 4 );
 #endif	
 	// setup port as input and enable pull-up
-#if 0
-	SW_DDR &= ~ ( _BV( SW_MENU ) | _BV( SW_EXIT ) | _BV( SW_UP ) | _BV( SW_DW ) );
-	SW_PORT |= _BV( SW_MENU ) | _BV( SW_EXIT ) | _BV( SW_UP ) | _BV( SW_DW );
-	SFIOR &= ~_BV( PUD );
-#endif
-	// setup lcd backlight as output
-	lcd_backlight_init();
-	// lcd backlight on
-	lcd_backlight_on(1);
-	
-	// setup clock for timer1
-	timer1_init();	// clk/1 no prescaling
-#if 0
-	// initial adc, lcd, and menu
-	adc_init();
-	lcd_init ();
-	menu_init ();
 
-	// set LED1, LED2 as output */
-	led_init();
-	// set LED pin to "1" ( LED1,LED2 off)
-	led_r_on(0);
-        led_g_on(0);
-#endif
+
 	// initial enc28j60
 	enc28j60_init( (BYTE*)&avr_mac );
 	
