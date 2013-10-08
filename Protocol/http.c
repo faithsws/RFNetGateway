@@ -30,7 +30,7 @@
 // Global variable for http.c
 //
 //********************************************************************************************
-prog_int8_t web_title[] = "AVRnet V1.1 by AVRportal.com";
+prog_int8_t web_title[] = "faithswsµÄÍøÕ¾";
 prog_int8_t tag_br[] = "<br>";
 prog_int8_t tag_hr[] = "<hr width=\"100%\" size=\"1\"><br>";
 prog_int8_t tag_form[] = "<form action=\"./?\" method=\"get\">";
@@ -167,7 +167,7 @@ void http_webserver_process ( BYTE *rxtx_buffer, BYTE *dest_mac, BYTE *dest_ip )
 				//eeprom_read_block ( count_time, ee_count_time, 3 );
 				//count_time[3] = 0;
 			}
-
+#endif
 			// print webpage
 			dlength = http_home( rxtx_buffer );
 			// send ack before send data
@@ -197,7 +197,7 @@ void http_webserver_process ( BYTE *rxtx_buffer, BYTE *dest_mac, BYTE *dest_ip )
 						dest_mac,		// server mac address
 						dest_ip );		// server ip address
 			flag1.bits.syn_is_received = 0;
-		#endif
+		
 		}	
 
 	}
@@ -293,3 +293,188 @@ void urldecode(unsigned char *urlbuf)
 	*dst = '\0';
 }
 
+WORD http_home( BYTE *rxtx_buffer )
+{
+	WORD dlen, adc0_value;
+
+	BYTE temp_value;
+
+	BYTE count_time_temp[3];
+
+	BYTE generic_buf[64];
+
+
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "HTTP/1.0 200 OK\r\nContent-Type: text/html\r\n\r\n" ), 0 );
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR  ( "<title>" ), dlen );
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, (PGM_P)web_title, dlen );
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "</title>" ), dlen );
+
+
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "<a href=\"http://www.avrportal.com/\" target=\"_blank\"><b><font color=\"#000099\" size=\"+1\">" ), dlen );
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, (PGM_P)web_title, dlen );
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "</font></b></a><br>" ), dlen );
+
+
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, (PGM_P)tag_hr, dlen );
+
+
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "LED 1 : " ), dlen );
+#if 0
+	if ( (LED_PORT & _BV ( LED_PIN1 )) )
+
+		dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "<font color=red>OFF" ), dlen );
+
+	else
+
+		dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "<font color=green>ON" ), dlen );
+#endif
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "</font> [ <a href=\"./?l1=" ), dlen );
+#if 0
+	if ( (LED_PORT & _BV ( LED_PIN1 )) )
+
+		dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "1\">ON" ), dlen );
+
+	else
+
+		dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "0\">OFF" ), dlen );
+#endif
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "</a> ], LED 2 : " ), dlen );
+#if 0
+	if ( (LED_PORT & _BV ( LED_PIN2 )) )
+
+		dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "<font color=red>OFF" ), dlen );
+
+	else
+
+		dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "<font color=green>ON" ), dlen );
+#endif
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "</font> [ <a href=\"./?l2=" ), dlen );
+#if 0
+        
+	if ( (LED_PORT & _BV ( LED_PIN2 )) )
+
+		dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "1\">ON" ), dlen );
+
+	else
+
+		dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "0\">OFF" ), dlen );
+#endif
+
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "</a> ]<br><br>" ), dlen );
+
+	// read adc0
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "ACD0 = " ), dlen );
+#if 0
+	adc0_value = adc_read ( 0 );
+
+	print_decimal ( generic_buf, 4, adc0_value );
+
+	generic_buf[ 4 ] = '\0';
+
+	dlen = tcp_puts_data ( rxtx_buffer, (BYTE *)generic_buf, dlen );
+
+	
+
+	// read temp
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "<br><br>Temparature = " ), dlen );
+
+	temp_value = adc_read_temp();
+
+	print_decimal ( generic_buf, 2, temp_value );
+
+	generic_buf[ 2 ] = '\0';
+
+	dlen = tcp_puts_data ( rxtx_buffer, (BYTE *)generic_buf, dlen );
+
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "&deg;C<br>" ), dlen );
+
+
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, (PGM_P)tag_form, dlen );
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "<INPUT TYPE=\"hidden\" NAME=\"tc\" VALUE=\"1\">Send Temparature in <INPUT TYPE=\"checkbox\" NAME=\"en\"" ), dlen );
+
+	eeprom_read_block ( count_time_temp, ee_count_time, 3 );
+
+	if ( count_time_temp[0] )
+
+		dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "CHECKED" ), dlen );
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "> Enable " ), dlen );
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "<INPUT TYPE=\"text\" NAME=\"h\" size=\"2\" maxlength=\"2\" VALUE=\"" ), dlen );
+
+	print_decimal ( generic_buf, 2, count_time_temp[1] );
+
+	generic_buf[ 2 ] = '\0';
+
+	dlen = tcp_puts_data ( rxtx_buffer, (BYTE *)generic_buf, dlen );
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "\"> Hours <INPUT TYPE=\"text\" NAME=\"m\" size=\"2\" maxlength=\"2\" VALUE=\"" ), dlen );
+
+	print_decimal ( generic_buf, 2, count_time_temp[2] );
+
+	generic_buf[ 2 ] = '\0';
+
+	dlen = tcp_puts_data ( rxtx_buffer, (BYTE *)generic_buf, dlen );
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "\"> Minutes<input type=\"submit\" value=\"OK\"></form>" ), dlen );
+
+
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, (PGM_P) tag_form, dlen );
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "<input name=\"aip\" type=\"text\" size=\"15\" maxlength=\"15\" value=\"" ), dlen );
+
+	print_ip ( generic_buf, (BYTE*)&avr_ip, 0 );
+
+	dlen = tcp_puts_data ( rxtx_buffer, (BYTE *)generic_buf, dlen );
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "\"> <input type=\"submit\" value=\"AVR IP\"></form>" ), dlen );
+
+
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, (PGM_P)tag_form, dlen );
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "<input name=\"sip\" type=\"text\" size=\"15\" maxlength=\"15\" value=\"" ), dlen );
+
+	print_ip ( generic_buf, (BYTE*)&server_ip, 0 );
+
+	dlen = tcp_puts_data ( rxtx_buffer, (BYTE *)generic_buf, dlen );
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "\"> <input type=\"submit\" value=\"Server IP\"></form>" ), dlen );
+
+
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, (PGM_P) tag_form, dlen );
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "<input name=\"lcd1\" type=\"text\" size=\"16\" maxlength=\"16\"> LCD Line 1<br>" ), dlen );
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "<input name=\"lcd2\" type=\"text\" size=\"16\" maxlength=\"16\"> LCD Line 2<br>" ), dlen );
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "<input type=\"submit\" value=\"Write LCD\"></form>" ), dlen );
+
+	
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, (PGM_P)tag_hr, dlen );
+
+
+
+	dlen = tcp_puts_data_p ( rxtx_buffer, PSTR ( "<a href=\"./\"><b><font color=\"#000099\" size=\"+1\">Refresh</font></b></a>" ), dlen );
+
+#endif
+
+	return(dlen);
+}

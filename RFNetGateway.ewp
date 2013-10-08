@@ -17,7 +17,7 @@
         <debug>1</debug>
         <option>
           <name>GenDeviceSelectMenu</name>
-          <state>UnspecifiedSTM8	STM8 - Unspecified</state>
+          <state>STM8S105K4	STM8S105K4</state>
         </option>
         <option>
           <name>GenCodeModel</name>
@@ -83,11 +83,11 @@
         </option>
         <option>
           <name>GenStackSize</name>
-          <state>0x100</state>
+          <state>1650</state>
         </option>
         <option>
           <name>GenHeapSize</name>
-          <state>0x100</state>
+          <state>350</state>
         </option>
         <option>
           <name>GeneralEnableMisra</name>
@@ -180,7 +180,7 @@
         </option>
         <option>
           <name>CCDefines</name>
-          <state>STM8S103</state>
+          <state>STM8S105</state>
         </option>
         <option>
           <name>CCPreprocFile</name>
@@ -583,7 +583,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>$TOOLKIT_DIR$\config\lnkstm8.icf</state>
+          <state>$TOOLKIT_DIR$\config\lnkstm8s105k4.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
@@ -1597,12 +1597,12 @@
     </file>
     <file>
       <name>$PROJ_DIR$\Drivers\src\stm8s_uart1.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\Drivers\src\stm8s_uart2.c</name>
       <excluded>
         <configuration>Debug</configuration>
       </excluded>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Drivers\src\stm8s_uart2.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\Drivers\src\stm8s_uart3.c</name>
@@ -1645,7 +1645,19 @@
     <name>$PROJ_DIR$\enc28j60.c</name>
   </file>
   <file>
+    <name>$PROJ_DIR$\enc28j60.h</name>
+  </file>
+  <file>
+    <name>$PROJ_DIR$\Protocol\includes.h</name>
+  </file>
+  <file>
+    <name>$PROJ_DIR$\lcd_digtron.c</name>
+  </file>
+  <file>
     <name>$PROJ_DIR$\main.c</name>
+  </file>
+  <file>
+    <name>$PROJ_DIR$\main.h</name>
   </file>
   <file>
     <name>$PROJ_DIR$\misc.c</name>

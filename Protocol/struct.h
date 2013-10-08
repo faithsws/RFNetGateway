@@ -59,8 +59,9 @@ typedef union _WORD_BYTES
     BYTE bytes[2];
     struct
     {
-        BYTE low;
+        
         BYTE high;
+		BYTE low;
     } byte;
     struct
     {
@@ -89,16 +90,16 @@ typedef union _DWORD_BYTE
 	WORD words[2];
     BYTE bytes[4];
     struct
-    {
-        WORD low;
+    {       
         WORD high;
+		WORD low;
     } word;
     struct
-    {
-        BYTE LB;
+    {       
+        BYTE MB;		
+        BYTE UB;		
         BYTE HB;
-        BYTE UB;
-        BYTE MB;
+		BYTE LB;
     } byte;
     struct
     {

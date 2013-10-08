@@ -251,10 +251,23 @@
 #define ENC28J60_BIT_FIELD_CLR       0xA0
 #define ENC28J60_SOFT_RESET          0xFF
 
+#include "stm8s.h"
+#define SD_SPI_CLK                       CLK_PERIPHERAL_SPI
+#define SD_SPI_SCK_PIN                   GPIO_PIN_5                  /* PC.05 */
+#define SD_SPI_SCK_GPIO_PORT             GPIOC                       /* GPIOC */
+#define SD_SPI_MISO_PIN                  GPIO_PIN_7                  /* PC.05 */
+#define SD_SPI_MISO_GPIO_PORT            GPIOC                       /* GPIOC */
+#define SD_SPI_MOSI_PIN                  GPIO_PIN_6                  /* PC.06 */
+#define SD_SPI_MOSI_GPIO_PORT            GPIOC                       /* GPIOC */
+
+
+#define ENC28J60_PORT   GPIOD
+#define ENC28J60_CS   GPIO_PIN_2
+#define ENC28J60_RST  GPIO_PIN_7
 // set CS to 0 = active
-#define CSACTIVE //PORTB &= ~_BV(PB4)
+#define CSACTIVE    GPIO_WriteLow(ENC28J60_PORT,ENC28J60_CS)
 // set CS to 1 = passive
-#define CSPASSIVE //PORTB |= _BV(PB4)
+#define CSPASSIVE  GPIO_WriteHigh(ENC28J60_PORT,ENC28J60_CS)
 //
 #define waitspi() while ((SPI->SR & SPI_SR_TXE) == 0)
 
@@ -273,12 +286,6 @@
 // max frame length which the conroller will accept:
 #define MAX_FRAMELEN	(1500+sizeof(ETH_HEADER)+4)        // maximum ethernet frame length
 
-#define ENC28J60_RESET_PIN_DDR	DDD3
-#define ENC28J60_INT_PIN_DDR	DDD2
-#define ENC28J60_RESET_PIN		PD3
-#define ENC28J60_INT_PIN		PD2
-#define ENC28J60_PORT			PORTD
-#define ENC28J60_DDR			DDRD
 
 // functions
 extern BYTE enc28j60ReadOp(BYTE op, BYTE address);
@@ -287,11 +294,11 @@ extern void enc28j60SetBank(BYTE address);
 extern BYTE enc28j60Read(BYTE address);
 extern void enc28j60Write(BYTE address, BYTE data);
 extern WORD enc28j60_read_phyreg(BYTE address);
-extern void enc28j60PhyWrite(BYTE address, WORD_BYTES data);
+extern void enc28j60PhyWrite(BYTE address, uint16_t data);
 extern void enc28j60_init( BYTE *avr_mac);
 extern BYTE enc28j60getrev(void);
-extern void enc28j60_packet_send ( BYTE *buffer, WORD length );
+extern void enc28j60_packet_send ( BYTE *buffer, uint16_t length );
 extern BYTE enc28j60_mac_is_linked(void);
 extern WORD enc28j60_tx_checksum( WORD offset, WORD len );
-extern WORD enc28j60_packet_receive ( BYTE *rxtx_buffer, WORD max_length );
+extern WORD enc28j60_packet_receive ( BYTE *rxtx_buffer, uint16_t max_length );
 

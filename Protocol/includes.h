@@ -40,6 +40,7 @@
 #include "udp.h"
 #include "http.h"
 
+#include "main.h"
 
 // define I/O interface
 
@@ -53,7 +54,7 @@
 #define LOW(uint) (uint&0xFF)
 #define HIGH(uint) ((uint>>8)&0xFF)
 
-#define MAX_RXTX_BUFFER		1518
+#define MAX_RXTX_BUFFER		1500
 
 // Added in V1.1
 // *** Note ****

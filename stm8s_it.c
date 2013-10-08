@@ -27,7 +27,7 @@
 /** @addtogroup Template_Project
   * @{
   */
-
+extern void TimingDelay_Decrement(void);
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -449,9 +449,9 @@ INTERRUPT_HANDLER(TIM6_UPD_OVF_TRG_IRQHandler, 23)
   */
  INTERRUPT_HANDLER(TIM4_UPD_OVF_IRQHandler, 23)
  {
-  /* In order to detect unexpected events during development,
-     it is recommended to set a breakpoint on the following instruction.
-  */
+  TimingDelay_Decrement();
+  /* Cleat Interrupt Pending bit */
+  TIM4_ClearITPendingBit(TIM4_IT_UPDATE);
  }
 #endif /*STM8S903*/
 
