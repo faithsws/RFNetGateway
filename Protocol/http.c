@@ -30,7 +30,7 @@
 // Global variable for http.c
 //
 //********************************************************************************************
-prog_int8_t web_title[] = "faithsws的网站";
+prog_int8_t web_title[] = "faithsws的网站-李鸿宇是笨蛋";
 prog_int8_t tag_br[] = "<br>";
 prog_int8_t tag_hr[] = "<hr width=\"100%\" size=\"1\"><br>";
 prog_int8_t tag_form[] = "<form action=\"./?\" method=\"get\">";

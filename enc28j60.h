@@ -261,6 +261,28 @@
 #define SD_SPI_MOSI_GPIO_PORT            GPIOC                       /* GPIOC */
 
 
+//#define USE_SPI_MODULE
+#ifndef USE_SPI_MODULE
+#define ENC_RST_PORT GPIOB
+#define ENC_RST_PIN GPIO_PIN_1
+
+#define ENC_SCK_PORT GPIOB
+#define ENC_SCK_PIN GPIO_PIN_2
+
+#define ENC_MISO_PORT GPIOB
+#define ENC_MISO_PIN GPIO_PIN_3
+
+#define ENC_CS_PORT GPIOE
+#define ENC_CS_PIN GPIO_PIN_5
+
+
+#define ENC_MOSI_PORT GPIOC
+#define ENC_MOSI_PIN GPIO_PIN_1
+
+#define CSACTIVE    GPIO_WriteLow(ENC_CS_PORT,ENC_CS_PIN)
+#define CSPASSIVE   GPIO_WriteHigh(ENC_CS_PORT,ENC_CS_PIN)
+#else
+
 #define ENC28J60_PORT   GPIOD
 #define ENC28J60_CS   GPIO_PIN_2
 #define ENC28J60_RST  GPIO_PIN_7
@@ -270,7 +292,7 @@
 #define CSPASSIVE  GPIO_WriteHigh(ENC28J60_PORT,ENC28J60_CS)
 //
 #define waitspi() while ((SPI->SR & SPI_SR_TXE) == 0)
-
+#endif
 // The RXSTART_INIT should be zero. See Rev. B4 Silicon Errata
 // buffer boundaries applied to internal 8K ram
 // the entire available packet buffer space is allocated
@@ -301,4 +323,5 @@ extern void enc28j60_packet_send ( BYTE *buffer, uint16_t length );
 extern BYTE enc28j60_mac_is_linked(void);
 extern WORD enc28j60_tx_checksum( WORD offset, WORD len );
 extern WORD enc28j60_packet_receive ( BYTE *rxtx_buffer, uint16_t max_length );
+
 

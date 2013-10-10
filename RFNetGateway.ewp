@@ -1615,6 +1615,27 @@
     </file>
   </group>
   <group>
+    <name>fatfs</name>
+    <file>
+      <name>$PROJ_DIR$\fatfs\diskio.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\fatfs\diskio.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\fatfs\ff.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\fatfs\ff.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\fatfs\ffconf.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\fatfs\integer.h</name>
+    </file>
+  </group>
+  <group>
     <name>protocol</name>
     <file>
       <name>$PROJ_DIR$\Protocol\arp.c</name>
@@ -1661,6 +1682,12 @@
   </file>
   <file>
     <name>$PROJ_DIR$\misc.c</name>
+  </file>
+  <file>
+    <name>$PROJ_DIR$\spi_sd.c</name>
+  </file>
+  <file>
+    <name>$PROJ_DIR$\spi_sd.h</name>
   </file>
   <file>
     <name>$PROJ_DIR$\stm8s_it.c</name>

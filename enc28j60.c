@@ -29,13 +29,7 @@
 //
 extern void delay1ms(__IO uint32_t nTime);
 extern void delay1us(__IO uint32_t us);
-//#define F_CPU 8000000UL  // 8 MHz
 
-//struct enc28j60_flag
-//{
-//	unsigned rx_buffer_is_free:1;
-//	unsigned unuse:7;
-//}enc28j60_flag;
 
 static uint8_t Enc28j60Bank;
 static uint16_t NextPacketPtr;
@@ -43,6 +37,8 @@ static uint16_t NextPacketPtr;
 #define SD_DUMMY_BYTE   0x00
 uint8_t SPISendByte(uint8_t Data)
 {
+
+#ifdef USE_SPI_MODULE
   /*!< Wait until the transmit buffer is empty */
   while (SPI_GetFlagStatus(SPI_FLAG_TXE) == RESET)
   {}
@@ -56,10 +52,29 @@ uint8_t SPISendByte(uint8_t Data)
 
   /*!< Return the byte read from the SPI bus */
   return SPI_ReceiveData();
+#else
+  uint8_t i;
+  for(i=0;i<8;i++)
+  {
+	GPIO_WriteLow(ENC_SCK_PORT,ENC_SCK_PIN);
+        if(Data & 0x80)
+          GPIO_WriteHigh(ENC_MOSI_PORT,ENC_MOSI_PIN);
+        else
+          GPIO_WriteLow(ENC_MOSI_PORT,ENC_MOSI_PIN);
+	GPIO_WriteHigh(ENC_SCK_PORT,ENC_SCK_PIN);
+	Data <<=1;
+  }
+  GPIO_WriteLow(ENC_SCK_PORT,ENC_SCK_PIN);
+  
+  return 0;
+#endif
+  
 }
 uint8_t SPIReadByte(void)
 {
   uint8_t Data = 0;
+#ifdef USE_SPI_MODULE
+  
 
   /*!< Wait until the transmit buffer is empty */
   while (SPI_GetFlagStatus(SPI_FLAG_TXE) == RESET)
@@ -72,9 +87,25 @@ uint8_t SPIReadByte(void)
   {}
   /*!< Get the received data */
   Data = SPI_ReceiveData();
-
+#else
+  
+  uint8_t i;
+  GPIO_WriteLow(ENC_SCK_PORT,ENC_SCK_PIN);
+  for(i=0;i<8;i++)
+  {	
+	GPIO_WriteHigh(ENC_SCK_PORT,ENC_SCK_PIN);
+	Data <<=1;
+        
+        if(0 != GPIO_ReadInputPin(ENC_MISO_PORT,ENC_MISO_PIN)) 
+          Data |= 0x01;
+	GPIO_WriteLow(ENC_SCK_PORT,ENC_SCK_PIN);
+  }
+  
+  
+#endif 
   /*!< Return the shifted data */
   return Data;
+  
 }
 //*******************************************************************************************
 //
@@ -240,172 +271,22 @@ void enc28j60PhyWrite(BYTE address, uint16_t data)
 		delay1us(15);
 	}
 }
-//*******************************************************************************************
-//
-// Function : icmp_send_request
-// Description : Send ARP request packet to destination.
-//
-//*******************************************************************************************
-/*
-void enc28j60_init( BYTE *avr_mac)
-{
-	// initialize I/O
-	//DDRB |= _BV( DDB4 );
-	//CSPASSIVE;
-
-
-
-	// enable PB0, reset as output /
-	ENC28J60_DDR |= _BV(ENC28J60_RESET_PIN_DDR);
-
-	// enable PD2/INT0, as input /
-	ENC28J60_DDR &= ~_BV(ENC28J60_INT_PIN_DDR);
-
-	// set output to gnd, reset the ethernet chip /
-	ENC28J60_PORT &= ~_BV(ENC28J60_RESET_PIN);
-	delay1ms(10);
-	// set output to Vcc, reset inactive /
-	ENC28J60_PORT |= _BV(ENC28J60_RESET_PIN);
-	delay1ms(200);
-
-	//initialize enc28j60/
-	//enc28j60Init( avr_mac );
-	//delay1ms( 20 );
-
-
-	DDRB  |= _BV( DDB4 ) | _BV( DDB5 ) | _BV( DDB7 ); // mosi, sck, ss output
-	//DDRB &= ~_BV( DDB6 ); // MISO is input
-
-	CSPASSIVE;
-
-	PORTB &= ~(_BV( PB5 ) | _BV( PB7 ) );
-
-	// initialize SPI interface
-	// master mode and Fosc/2 clock:
-	SPCR = _BV( SPE ) | _BV( MSTR );
-	SPSR |= _BV( SPI2X );
-
-	// perform system reset
-	enc28j60WriteOp(ENC28J60_SOFT_RESET, 0, ENC28J60_SOFT_RESET);
-	delay1ms(50);
-
-	// check CLKRDY bit to see if reset is complete
-	// The CLKRDY does not work. See Rev. B4 Silicon Errata point. Just wait.
-	//while(!(enc28j60Read(ESTAT) & ESTAT_CLKRDY));
-	// do bank 0 stuff
-	// initialize receive buffer
-	// 16-bit transfers, must write low byte first
-	// set receive buffer start address
-	next_packet_ptr.word = RXSTART_INIT;
-	// Rx start
-	enc28j60Write(ERXSTL, RXSTART_INIT&0xFF);
-	enc28j60Write(ERXSTH, RXSTART_INIT>>8);
-	// set receive pointer address
-	enc28j60Write(ERXRDPTL, RXSTART_INIT&0xFF);
-	enc28j60Write(ERXRDPTH, RXSTART_INIT>>8);
-	// RX end
-	enc28j60Write(ERXNDL, RXSTOP_INIT&0xFF);
-	enc28j60Write(ERXNDH, RXSTOP_INIT>>8);
-	// TX start
-	enc28j60Write(ETXSTL, TXSTART_INIT&0xFF);
-	enc28j60Write(ETXSTH, TXSTART_INIT>>8);
-	// TX end
-	enc28j60Write(ETXNDL, TXSTOP_INIT&0xFF);
-	enc28j60Write(ETXNDH, TXSTOP_INIT>>8);
-	// do bank 1 stuff, packet filter:
-	// For broadcast packets we allow only ARP packtets
-	// All other packets should be unicast only for our mac (MAADR)
-	//
-	// The pattern to match on is therefore
-	// Type     ETH.DST
-	// ARP      BROADCAST
-	// 06 08 -- ff ff ff ff ff ff -> ip checksum for theses bytes=f7f9
-	// in binary these poitions are:11 0000 0011 1111
-	// This is hex 303F->EPMM0=0x3f,EPMM1=0x30
-	enc28j60Write(ERXFCON, ERXFCON_UCEN|ERXFCON_CRCEN|ERXFCON_PMEN);
-	enc28j60Write(EPMM0, 0x3f);
-	enc28j60Write(EPMM1, 0x30);
-	enc28j60Write(EPMCSL, 0xf9);
-	enc28j60Write(EPMCSH, 0xf7);
-
-	
-
-	// do bank 2 stuff
-	// enable MAC receive
-	enc28j60Write(MACON1, MACON1_MARXEN|MACON1_TXPAUS|MACON1_RXPAUS);
-	// bring MAC out of reset
-	//enc28j60Write(MACON2, 0x00);
-	// enable automatic padding to 60bytes and CRC operations
-	enc28j60WriteOp(ENC28J60_BIT_FIELD_SET, MACON3, MACON3_PADCFG0|MACON3_TXCRCEN|MACON3_FRMLNEN);
-	// set inter-frame gap (non-back-to-back)
-	enc28j60Write(MAIPGL, 0x12);
-	enc28j60Write(MAIPGH, 0x0C);
-	// set inter-frame gap (back-to-back)
-	enc28j60Write(MABBIPG, 0x12);
-	// Set the maximum packet size which the controller will accept
-	// Do not send packets longer than MAX_FRAMELEN:
-	enc28j60Write(MAMXFLL, MAX_FRAMELEN&0xFF);	
-	enc28j60Write(MAMXFLH, MAX_FRAMELEN>>8);
-	// do bank 3 stuff
-	// write MAC address
-	// NOTE: MAC address in ENC28J60 is byte-backward
-
-	// ENC28J60 is big-endian avr gcc is little-endian
-	enc28j60Write(MAADR5, avr_mac[0]);
-	enc28j60Write(MAADR4, avr_mac[1]);
-	enc28j60Write(MAADR3, avr_mac[2]);
-	enc28j60Write(MAADR2, avr_mac[3]);
-	enc28j60Write(MAADR1, avr_mac[4]);
-	enc28j60Write(MAADR0, avr_mac[5]);
-	// no loopback of transmitted frames
-	enc28j60PhyWrite(PHCON2, (WORD_BYTES){PHCON2_HDLDIS});
-	// switch to bank 0
-	enc28j60SetBank(ECON1);
-	// enable interrutps
-	enc28j60WriteOp(ENC28J60_BIT_FIELD_SET, EIE, EIE_INTIE|EIE_PKTIE);
-	// enable packet reception
-	enc28j60WriteOp(ENC28J60_BIT_FIELD_SET, ECON1, ECON1_RXEN);
-
-
-
-	// Magjack leds configuration, see enc28j60 datasheet, page 11 /
-	// LEDB=yellow LEDA=green
-	//
-	// 0x476 is PHLCON LEDA=links status, LEDB=receive/transmit
-	// enc28j60PhyWrite(PHLCON,0b0000 0100 0111 01 10);
-	enc28j60PhyWrite(PHLCON,(WORD_BYTES){0x0472});
-
-	// set LED B to display recieve and transmit activate
-
-	//enc28j60PhyWrite( PHLCON, 0x0476 );
-
-
-
-	//enc28j60_flag.rx_buffer_is_free = 1;
-	delay1ms(20);
-}
-*/
 
 
 void enc28j60_init( BYTE *avr_mac)
 {
   BYTE val;     
+  
+#ifdef USE_SPI_MODULE  
   GPIO_Init(ENC28J60_PORT, (GPIO_Pin_TypeDef)(ENC28J60_RST |ENC28J60_CS) ,GPIO_MODE_OUT_PP_HIGH_SLOW);
-       
-        CLK_PeripheralClockConfig(SD_SPI_CLK, ENABLE);
-
-  /* Set the MOSI,MISO and SCK at high level */
-        GPIO_ExternalPullUpConfig(SD_SPI_SCK_GPIO_PORT, (GPIO_Pin_TypeDef)(SD_SPI_MISO_PIN | SD_SPI_MOSI_PIN | \
+  GPIO_ExternalPullUpConfig(SD_SPI_SCK_GPIO_PORT, (GPIO_Pin_TypeDef)(SD_SPI_MISO_PIN | SD_SPI_MOSI_PIN | \
                             SD_SPI_SCK_PIN), DISABLE);
 
-  /* SD_SPI Configuration */
-         SPI_Init( SPI_FIRSTBIT_MSB, SPI_BAUDRATEPRESCALER_4, SPI_MODE_MASTER,
-           SPI_CLOCKPOLARITY_LOW, SPI_CLOCKPHASE_1EDGE, SPI_DATADIRECTION_2LINES_FULLDUPLEX,
+        CLK_PeripheralClockConfig(SD_SPI_CLK, ENABLE);
+        SPI_Init( SPI_FIRSTBIT_MSB, SPI_BAUDRATEPRESCALER_4, SPI_MODE_MASTER,SPI_CLOCKPOLARITY_LOW, SPI_CLOCKPHASE_1EDGE, SPI_DATADIRECTION_2LINES_FULLDUPLEX,
            SPI_NSS_SOFT, 0x07);
-
-
-  /* SD_SPI enable */
         SPI_Cmd( ENABLE);
+        
         CSPASSIVE;
         
         GPIO_WriteLow(ENC28J60_PORT,ENC28J60_RST);
@@ -413,6 +294,24 @@ void enc28j60_init( BYTE *avr_mac)
         GPIO_WriteHigh(ENC28J60_PORT,ENC28J60_RST);
         delay1ms(200);
         CSPASSIVE;
+#else
+    GPIO_Init(ENC_RST_PORT, (GPIO_Pin_TypeDef)(ENC_RST_PIN) ,GPIO_MODE_OUT_PP_HIGH_SLOW);     
+    GPIO_Init(ENC_SCK_PORT, (GPIO_Pin_TypeDef)( ENC_SCK_PIN),GPIO_MODE_OUT_PP_LOW_SLOW);
+    
+    GPIO_Init(ENC_MISO_PORT, (GPIO_Pin_TypeDef)( ENC_MISO_PIN),GPIO_MODE_IN_PU_NO_IT);
+    GPIO_Init(ENC_CS_PORT, (GPIO_Pin_TypeDef)(ENC_CS_PIN) ,GPIO_MODE_OUT_PP_HIGH_SLOW);
+    GPIO_Init(ENC_MOSI_PORT, (GPIO_Pin_TypeDef)(ENC_MOSI_PIN) ,GPIO_MODE_OUT_PP_HIGH_SLOW);
+    CSACTIVE;
+    CSPASSIVE;
+        
+    
+    GPIO_WriteLow(ENC_RST_PORT,ENC_RST_PIN);
+    delay1ms(10);
+    GPIO_WriteHigh(ENC_RST_PORT,ENC_RST_PIN);
+    delay1ms(200);
+    CSPASSIVE;
+#endif
+        
 
 	// perform system reset
 	enc28j60WriteOp(ENC28J60_SOFT_RESET, 0, ENC28J60_SOFT_RESET);

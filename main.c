@@ -342,7 +342,7 @@ static void TIM4_Config(void)
 int main (void)
 {
         BYTE vr;
-        lcddig_init();
+       
 	TIM4_Config();
   // change your mac address here
 
