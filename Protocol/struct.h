@@ -27,8 +27,11 @@
 //typedef enum _BOOL { false = 0, true } bool;
 #ifndef __STRUCT_H__
 #define __STRUCT_H__
+
+#include "fatfs/integer.h"
+
 typedef unsigned char	BYTE;				// 8-bit
-typedef unsigned int	WORD;				// 16-bit
+//typedef unsigned short	WORD;				// 16-bit
 typedef unsigned long	DWORD;				// 32-bit
 
 typedef unsigned char  prog_int8_t;

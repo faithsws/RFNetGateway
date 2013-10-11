@@ -83,11 +83,11 @@
         </option>
         <option>
           <name>GenStackSize</name>
-          <state>1650</state>
+          <state>1700</state>
         </option>
         <option>
           <name>GenHeapSize</name>
-          <state>350</state>
+          <state>300</state>
         </option>
         <option>
           <name>GeneralEnableMisra</name>
@@ -251,6 +251,7 @@
           <state>$PROJ_DIR$</state>
           <state>$PROJ_DIR$\Drivers\inc</state>
           <state>$PROJ_DIR$\Protocol</state>
+          <state>$PROJ_DIR$\fatfs</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -555,7 +556,7 @@
         </option>
         <option>
           <name>IlinkMapFile</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>IlinkLogFile</name>

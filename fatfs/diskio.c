@@ -22,7 +22,7 @@ DSTATUS disk_initialize (
 	int result;
 	//result = MMC_disk_initialize();
         SD_Init();
-	return stat;
+	return 0;
 
 }
 
@@ -57,8 +57,8 @@ DRESULT disk_read (
 	DRESULT res;
 	int result;
         //result = MMC_disk_read(buff, sector, count);
-        SD_ReadBlock(buff, sector, count);
-	return res;
+        SD_ReadBlock(buff, sector*512, count*512);
+	return 0;
 
 }
 

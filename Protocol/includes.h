@@ -54,13 +54,8 @@
 #define LOW(uint) (uint&0xFF)
 #define HIGH(uint) ((uint>>8)&0xFF)
 
-#define MAX_RXTX_BUFFER		1500
+#define MAX_RXTX_BUFFER		900//1500
 
-// Added in V1.1
-// *** Note ****
-// uncomment below to remove bootloader support
-//#define REMOVE_BOOTLOADER_SUPPORT 1
-// End added in V1.1
 
 // global variables
 extern MAC_ADDR avr_mac;

@@ -36,6 +36,8 @@
 //********************************************************************************************
 #include "includes.h"
 #include "main.h"
+#include "spi_sd.h"
+#include "ff.h"
 union flag1 flag1;
 union flag2 flag2;
 // Global variables
@@ -341,8 +343,21 @@ static void TIM4_Config(void)
 //*****************************************************************************************
 int main (void)
 {
-        BYTE vr;
-       
+#if 1
+        FATFS fs;       
+        f_mount(0,&fs);
+#if 0        
+        FIL fp;
+        FRESULT fr;
+        UINT br;
+        BYTE rxtx_buffer[100];
+        fr = f_open (&fp, "0:123.txt", FA_READ);
+        fr = f_read (&fp, rxtx_buffer, fp.fsize, &br);
+        f_close(&fp);
+#endif
+#endif
+        
+        
 	TIM4_Config();
   // change your mac address here
 
@@ -357,15 +372,8 @@ int main (void)
 	eeprom_read_block ( (uint8_t*)&avr_ip, ee_avr_ip, 4 );
 	eeprom_read_block ( (uint8_t*)&server_ip, ee_server_ip, 4 );
 
-	// setup port as input and enable pull-up
-
-
 	// initial enc28j60
 	enc28j60_init( (BYTE*)&avr_mac );
-	vr = enc28j60getrev();
-// added in V1.1
-	//lcd_print_p( (PGM_P)version );
-// end added in V1.1
 
 	// loop forever
 	for(;;)
